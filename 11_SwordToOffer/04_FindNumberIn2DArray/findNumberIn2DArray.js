@@ -26,13 +26,11 @@
  */
 var findNumberIn2DArray = function(matrix, target) {
   var result = false;
-  var rows = matrix.length;
-  var columns = matrix[0].length;
 
-  if (matrix && rows > 0 && columns > 0) {
+  if (matrix && matrix.length > 0 && matrix[0].length > 0) {
     var row = 0;
-    var column = columns - 1;
-    while (row < rows && column >= 0) {
+    var column = matrix[0].length - 1;
+    while (row < matrix.length && column >= 0) {
       if (matrix[row][column] === target) {
         result = true;
         break;
