@@ -61,7 +61,7 @@ for (let i = 0; i < outerLen; i++) {
 与数组相关的问题，基本都会结合排序、二分和动态规划来设计。
 
 ### 两数之和
-LeetCode：「01. 两数之和」https://leetcode-cn.com/problems/two-sum/ （难度：简单）
+LeetCode：[01. 两数之和](https://leetcode-cn.com/problems/two-sum/)（难度：简单）
 
 #### 问题描述
 给定一个整数数组`nums`和一个目标值`target`，请你在该数组中找出和为目标值的那**两个**整数，并返回他们的数组下标。
@@ -105,7 +105,7 @@ const twoSum = function(nums, target) {
 ```
 
 ### 合并两个有序数组
-LeetCode：「88. 合并两个有序数组」https://leetcode-cn.com/problems/merge-sorted-array/ （难度：简单）
+LeetCode：[88. 合并两个有序数组](https://leetcode-cn.com/problems/merge-sorted-array/)（难度：简单）
 
 #### 问题描述
 给你两个有序整数数组`nums1`和`nums2`，请你将`nums2`合并到`nums1`中，使`nums1`成为一个有序数组。
@@ -168,7 +168,7 @@ const merge = function(nums1, m, nums2, n) {
 ```
 
 ### 三数之和
-LeetCode：「15. 三数之和」https://leetcode-cn.com/problems/3sum/ （难度：中等）
+LeetCode：[15. 三数之和](https://leetcode-cn.com/problems/3sum/)（难度：中等）
 
 #### 问题描述
 给你一个包含`n`个整数的数组`nums`，判断`nums`中是否存在三个元素`a`，`b`，`c`，使得`a + b + c = 0`？请你找出所有满足条件且不重复的三元组。
@@ -272,7 +272,7 @@ const threeSum = function (nums) {
 ```
 
 ### “合并区间”问题
-LeetCode：[56. 合并区间]https://leetcode-cn.com/problems/merge-intervals/ （难度：中等）
+LeetCode：[56. 合并区间](https://leetcode-cn.com/problems/merge-intervals/)（难度：中等）
 
 #### 问题描述
 给出一个区间的集合，请合并所有重叠的区间。 
@@ -327,4 +327,197 @@ const merge = function (intervals) {
   }
   return res;
 }
+```
+
+### 寻找两个正序数组的中位数
+LeetCode：[4. 寻找两个正序数组的中位数](https://leetcode-cn.com/problems/median-of-two-sorted-arrays/)（难度：困难）
+
+#### 问题描述
+给定两个大小为`m`和`n`的正序（从小到大）数组`nums1`和`nums2`。请你找出并返回这两个正序数组的中位数。
+
+进阶：你能设计一个时间复杂度为`O(log (m+n))`的算法解决此问题吗？
+```
+示例 1：
+  输入: nums1 = [1, 3], nums2 = [2]
+  输出: 2.00000
+  解释: 合并数组 = [1, 2, 3]，中位数 2
+示例 2：
+  输入: nums1 = [1, 2], nums2 = [3, 4]
+  输出: 2.50000
+  解释: 合并数组 = [1, 2, 3, 4]，中位数 (2 + 3) / 2 = 2.5
+示例 3：
+  输入: nums1 = [0, 0], nums2 = [0, 0]
+  输出: 0.00000
+示例 4：
+  输入: nums1 = [], nums2 = [1]
+  输出: 1.00000
+示例 5：
+  输入: nums1 = [2], nums2 = []
+  输出: 2.00000
+```
+
+#### 问题分析
+由于问题中给出的数组都是已经排好了序，在排好序的数组中查找很容易想到可以使用二分查找（Binary Search）。
+
+因为要求得数组的中位数，所以需要分别对数组 A 和数组 B 进行分割，分成左右的两部分。在这里可以用长度较小的那个数组进行二分。假设`m < n`，则定义：
+```
+let low = 0, high = m, i = low + (high - low) / 2;
+```
+
+数组 A 以`i`做分割，数组 B 以`j`做分割，使之满足于`i + j = (m + n) / 2`，则可以轻松得到`j`的值。此时有：
+```
+if (A[i] <= B[j + 1] && B[j] <= A[i + 1]) {
+  if ((m + n) % 2 === 1){
+    median = max(A[i], B[j]);
+  } else {
+    median = (max(A[i], B[j]), min(A[i + 1], B[j + 1])) / 2;
+  }
+}
+```
+
+如果`A[i] > B[j + 1]`，说明左边的要比右边的要大，此时要往数组的左半部分移动，使`high = i - 1`。然后对数组 A 的区间`[low, i - 1]`进行二分，对数组 A 和数组 B 重新分割，此时有：
+```
+i = (low + high) / 2，j = (m + n + 1) / 2 - i;
+```
+
+如果`B[j] > A[i + 1]`，说明右边的要比左边的要大，此时要往数组的右半部分移动，使`low = i + 1`。然后对数组 A 的区间`[i + 1, high]`进行二分，对数组 A 和数组 B 重新分割，此时有：
+```
+i = (low + high) / 2，j = (m + n + 1) / 2 - i;
+```
+
+满足`(low <= high)`条件，直到找到`median`。
+
+注意：当左边或者右边没有元素的时候，左边用`INF_MIN`，右边用`INF_MAX`表示左右的元素。
+
+使用二分查找来解决这个问题的关键点在于要分割两个排好序的数组为左右两等份。分割点需要满足：
+```
+ALeft.length + BLeft.length = (m + n + 1) / 2;
+```
+
+其中，`m`表示数组 A 的长度，`n`表示数组 B 的长度。
+
+并且在对数组进行分割之后，数组 A 左边的最大值（`maxLeftA`）、数组 A 右边的最小值（`minRightA`）、数组 B 左边的最大值（`maxLeftB`）、数组 B 右边的最小值（`minRightB`）满足于：
+```
+maxLeftA <= minRightB && maxLeftB <= minRightA;
+```
+
+有了这两个条件，那么`median`就在这四个数中，根据奇数或是偶数来分别判别：
+- 奇数：`median = max(maxLeftA, maxLeftB)`
+- 偶数：`median = (max(maxLeftA, maxLeftB) + min(minRightA, minRightB)) / 2`
+
+### 问题实现
+```
+/**
+  * @param {number[]} nums1
+  * @param {number[]} nums2
+  * @return {number}
+  */
+const findMedianSortedArrays = function (nums1, nums2) {
+  // 确保对较短的数组进行二分查找
+  if (nums1.length > nums2.length) {
+    [nums1, nums2] = [nums2, nums1];
+  }
+  // 定义两个数组的长度
+  const m = nums1.length;
+  const n = nums2.length;
+  // 定义较短数组的两个指针
+  let low = 0;
+  let high = m;
+
+  while(low <= high) {
+    // 定义数组 A 和数组 B 的切割点
+    const i = low + Math.floor((high - low) / 2);
+    const j = Math.floor((m + n + 1) / 2) - i;
+
+    const maxLeftA = i === 0 ? -Infinity : nums1[i-1];
+    const minRightA = i === m ? Infinity : nums1[i];
+    const maxLeftB = j === 0 ? -Infinity : nums2[j-1];
+    const minRightB = j === n ? Infinity : nums2[j];
+
+    if (maxLeftA <= minRightB && minRightA >= maxLeftB) {
+      return (m + n) % 2 === 1
+        ? Math.max(maxLeftA, maxLeftB)
+        : (Math.max(maxLeftA, maxLeftB) + Math.min(minRightA, minRightB)) / 2;
+    } else if (maxLeftA > minRightB) {
+      high = i - 1;
+    } else {
+      low = low + 1;
+    }
+  }
+};
+```
+### “接雨水”问题
+LeetCode：[42. 接雨水](https://leetcode-cn.com/problems/trapping-rain-water/)（难度：困难）
+
+#### 问题描述
+给定`n`个非负整数表示每个宽度为`1`的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
+```
+示例 1：
+  输入：height = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]
+  输出：6
+示例 2：
+  输入：height = [4, 2, 0, 3, 2, 5]
+  输出：9
+```
+
+#### 问题分析
+对于这个问题来说，一般使用双指针法来解决。这个问题是一个与现实生活结合得比较紧密的应用问题，拿到手要做的第一件事就是要结合问题描述和问题示例抽离解题模型。
+
+从示例来说，这个问题给到的一个关键信息是它的入参是一个数组，因此肯定是需要使用“遍历”方式来解决。雨水是由柱子“围起来”的，每滩雨水的两侧都有两根柱子，雨水是否能够接住，能接住多少雨水，涉及到两根柱子的综合分析。因此，这个问题需要使用两个指针来对数组进行遍历。
+
+对于数组问题来说，双指针未必总是作为单指针解法的改进技巧存在，它也是有对口解决问题的场景。所以在解决数组一类的问题（尤其是比较复杂的数组问题）时，双指针法必须在备选方案里存在。
+
+对于这个问题本身来说，双指针的作用就是帮助更加直接地处理“柱子高度和雨水量”之间的关系，实现对现实问题的模拟。所以说要想弄清楚双指针怎么用，首先得捋清楚“柱子高度和雨水量”之间的关系。找关系的这个过程很关键，考验的是观察能力和归纳总结能力。
+
+如果对“柱子高度和雨水量”之间的关系这个大问题感到懵逼，那么不妨把它拆解成更加具体的小问题。终极目标是统计雨水量，要想做到这点，有两个前提：一是要能接到雨水，二是要知道接到了多少雨水。拆解出来的问题就可以是这样的：
+- 什么情况下能接到雨水
+- 接到的雨水的量的多少是由谁来决定的
+
+由这两个问题带入问题描述中，不难得出如下的结论：
+- 两个柱子之间有“凹槽”时，可以接到雨水
+- 雨水的量由左右两边较矮的柱子的高度决定
+
+因为这个问题中的“凹槽”是在对撞的过程中“夹”出来的，因此需要选择对撞指针。由问题描述可知，对于左右两边来说，“凹槽”的高度就是相邻两根柱子之间的高度差，但是对于中间的“凹槽”来说，它的高度是当前柱子和它左侧最高的那个柱子之间的高度差。因此，“凹槽”的深度不是由与它相邻的柱子来决定的，而是由某一侧的最高的柱子来决定的。
+
+由此可以得到一个这样的结论：对于“凹槽”来说，决定它高度的不是与它相邻的那个柱子，而是左侧最高柱子和右侧最高柱子中，较矮的那个柱子。因此在指针对撞的过程中，主要任务有两个：
+- 维护一对`leftCur`（左指针）和`rightCur`（右指针），以对撞的形式从两边向中间遍历所有的柱子
+- 在遍历的过程中，维护一对`leftMax`和`rightMax`，时刻记录当前两侧柱子高度的最大值。以便在遇到“凹槽”时，结合`leftCur`与`rightCur`各自指向的柱子高度，完成凹槽深度（也就是蓄水量）的计算
+
+#### 问题实现
+```
+/**
+  * @param {number[]} height
+  * @return {number}
+  */
+const trap = function (height) {
+  // 初始化左指针和右指针
+  let leftCur = 0, rightCur = height.length - 1;
+  // 初始化最终结果
+  let res = 0;
+  // 初始化左侧最高的柱子和右侧最高的柱子 
+  let leftMax = 0, rightMax = 0;
+  // 对撞指针开始
+  while (leftCur < rightCur) {
+    // 缓存左指针所指的柱子的高度和右指针所指的柱子的高度
+    const left = height[leftCur], right = height[rightCur];
+    // 以左右两边较矮的柱子为准，选定计算目标
+    if (left < right) {
+      // 更新 leftMax
+      leftMax = Math.max(left, leftMax);
+      // 累加蓄水量
+      res += leftMax - left;
+      // 移动左指针
+      leftCur++;
+    } else {
+      // 更新 rightMax
+      rightMax = Math.max(right, rightMax);
+      // 累加蓄水量
+      res += rightMax - right;
+      // 移动右指针
+      rightCur--;
+    }
+  }
+  // 返回计算结果
+  return res;
+};
 ```
