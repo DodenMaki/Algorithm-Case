@@ -10,12 +10,12 @@ describe('211. 添加与搜索单词 - 数据结构设计', () => {
     expect(wordDictionary.search('pad')).toBeFalsey();
   });
   test('示例 2', function() {
-    wordDictionary.search('bad').toBeTruthy();
+    expect(wordDictionary.search('bad')).toBeTruthy();
   });
   test('示例 3', function() {
-    wordDictionary.search('.ad').toBeTruthy();
+    expect(wordDictionary.search('.ad')).toBeTruthy();
   });
   test('示例 4', function() {
-    wordDictionary.search('b..').toBeTruthy();
+    expect(wordDictionary.search('b..')).toBeTruthy();
   });
 });
