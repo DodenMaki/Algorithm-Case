@@ -98,3 +98,136 @@ const isValid = function (s) {
   return !stack.length;
 }
 ```
+
+### 每日温度问题
+LeetCode：[739. 每日温度](https://leetcode-cn.com/problems/daily-temperatures/)（难度：中等）
+
+#### 问题描述
+请根据每日气温列表，请重新生成一个列表，对应位置的输出为要想观测到更高的气温，至少需要等待的天数。如果之后都不会升高，请在该位置用`0`来代替。
+气温列表长度的范围是`[1, 30000]`。每个气温的值的均为华氏度，都是在`[30, 100]`范围内的整数。
+```
+示例 1：
+  输入: temperatures = [73, 74, 75, 71, 69, 72, 76, 73]
+  输出: [1, 1, 4, 2, 1, 1, 0, 0]
+```
+
+#### 问题分析
+栈结构可以避免一个数组两层遍历的重复操作，避免重复操作的秘诀就是及时地将不必要的数据出栈，避免它对后续的遍历产生干扰。
+
+对于这个问题来说，就是要尝试去维持一个递减栈。当遍历过的温度，维持的是一个单调递减的态势时，对这些温度的索引下标执行入栈操作；只要出现了一个数字，它打破了这种单调递减的趋势，也就是说它比前一个温度值高，这时就对前后两个温度的索引下标求差，得出前一个温度距离第一次升温的目标差值。
+
+在这个过程中，仅对每一个温度执行最多一次入栈操作、一次出栈操作，整个数组只会被遍历一次，因此时间复杂度就是`O(n)`。
+
+#### 问题实现
+```
+/**
+  * @param {number[]} T
+  * @return {number[]}
+  */
+// 入参是温度数组
+const dailyTemperatures = function (T) {
+  // 缓存数组的长度
+  const len = T.length;
+  // 初始化一个栈
+  const stack = [];
+  // 初始化结果数组，注意数组需要定长，占位为 0
+  const res = (new Array(len)).fill(0);
+  
+  for (let i = 0; i < len; i++) {
+    // 若栈的长度不为0，且存在打破递减趋势的温度值
+    while (stack.length && T[i] > T[stack[stack.length - 1]]) {
+      // 将栈顶温度值对应的索引出栈
+      const top = stack.pop();
+      // 计算当前栈顶温度值与第一个高于它的温度值的索引差值
+      res[top] = i - top;
+    }
+    // 注意栈里存的不是温度值，而是索引值，这是为了后面方便计算
+    stack.push(i);
+  }
+  // 返回结果数组
+  return res;
+};
+```
+
+### 最小栈问题
+LeetCode：[155. 最小栈](https://leetcode-cn.com/problems/min-stack/)（难度：简单）
+
+#### 问题描述
+设计一个支持`push`，`pop`，`top`操作，并能在常数时间内检索到最小元素的栈。
+- `push(x)`：将元素`x`推入栈中
+- `pop()`：删除栈顶的元素
+- `top()`：获取栈顶元素
+- `getMin()`：检索栈中的最小元素。
+```
+示例 1：
+  输入: ["MinStack", "push", "push", "push", "getMin", "pop", "top", "getMin"]
+       [[], [-2], [0], [-3], [], [], [], []]
+  输出: [null, null, null, null, -3, null, 0, -2]
+  解释: MinStack minStack = new MinStack();
+       minStack.push(-2);
+       minStack.push(0);
+       minStack.push(-3);
+       minStack.getMin();    --> 返回 -3
+       minStack.pop();
+       minStack.top();       --> 返回 0
+       minStack.getMin();    --> 返回 -2
+```
+
+#### 问题分析
+`getMin`要做的事情是从一个栈里找出其中最小的数字。
+
+第一个方法是先初始化一个最小值变量，它的初始值可以设一个非常大的数（如`Infinity`），然后开始遍历整个栈。在遍历的过程中，如果遇到了更小的值，就把最小值变量更新为这个更小的值。这样遍历结束后，我们就能拿到栈中的最小值了。这个过程中，对栈进行了一次遍历，时间复杂度无疑是`O(n)`。
+
+但是，在这个问题里，还可以考虑再搞个栈出来作为辅助，让这个栈去容纳当前的最小值。以空间换时间，将算法的时间复杂度由`O(n)`变为`O(1)`。要让这个辅助栈确切提供最小值，需要实现的是一个从栈底到栈顶呈递减趋势的栈：
+- 取最小值：由于整个栈从栈底到栈顶递减，因此栈顶元素就是最小元素
+- 若有新元素入栈：判断是不是比栈顶元素还要小，否则不准进入辅助栈
+- 若有元素出栈：判断是不是和栈顶元素相等，如果是的话，辅助栈也要出栈
+
+#### 问题实现
+```
+/**
+ * initialize your data structure here.
+ */
+const MinStavck = function () {
+  this.stack = [];
+  // 定义辅助栈
+  this.stack2 = [];
+}
+
+/**
+  * @param {number} x
+  * @return {void}
+  */
+MinStack.prototype.push = function (x) {
+  this.stack.push(x);
+  // 若入栈的值小于当前最小值，则推出辅助栈的栈顶
+  if (this.stack2.length === 0 || this.stack2[this.stack2.length - 1] >= x) {
+    this.stack2.push(x);
+  }
+}
+
+/**
+  * @return {void}
+  */
+MinStack.prototype.pop = function () {
+  // 若出栈的值和当前最小值相等，那么辅助栈也要对栈顶元素进行出栈，确保最小值的有效性
+  if (this.stack.pop() === this.stack2[this.stack2.length - 1]) {
+    this.stack2.pop();
+  }
+}
+
+/**
+  * @return {number}
+  */
+MinStack.prototype.top = function () {
+  return this.stack[this.stack.length - 1];
+}
+
+/**
+  * @return {number}
+  */
+MinStack.prototype.getMin = function() {
+  // 辅助栈的栈顶，存的就是目标中的最小值
+  return this.stack2[this.stack2.length - 1];
+}
+```
