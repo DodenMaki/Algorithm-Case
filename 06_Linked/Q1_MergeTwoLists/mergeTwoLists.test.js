@@ -17,6 +17,6 @@ resultListNode.next.next.next.next.next = new ListNode(4);
 
 describe('21. 合并两个有序链表', () => {
   test('示例 1', function() {
-    expect(mergeTwoLists(listNode1, listNode2).toEqual(resultListNode));
+    expect(mergeTwoLists(listNode1, listNode2)).toEqual(resultListNode);
   });
 });
