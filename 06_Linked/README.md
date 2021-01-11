@@ -355,3 +355,132 @@ const reverseList = function(head) {
 };
 ```
 
+### 局部反转一个链表
+LeetCode：[92. 反转链表 II](https://leetcode-cn.com/problems/reverse-linked-list-ii/)（难度：中等）
+
+#### 问题描述
+反转从位置`m`到`n`的链表。请使用一趟扫描完成反转。
+
+说明：`1 ≤ m ≤ n ≤ 链表长度`。
+
+```
+示例 1：
+  输入: head = 1 -> 2 -> 3 -> 4 -> 5 -> NIULL, m = 2, n = 4
+  输出: 1 -> 4 -> 3 -> 2 -> 5 -> NULL
+```
+
+#### 问题分析
+这个问题仍然是从指针反转来入手，因为需要反转的是链表的第`m`到`n`之间的结点，这之间的反转可以采用与全部反转一样的逻辑。但是在让`m - 1`个结点指向`n`，`m`节点指向`n + 1`个节点时，还需要对`m - 1`和`n + 1`结点做额外的处理。
+
+由于遍历链表的顺序是从前往后遍历，为了避免结点`m - 1`和结点`m`随着遍历向后推进被遗失，需要提前把`m - 1`结点缓存下来。而结点`n + 1`在随着遍历的进行，当完成了结点`n`的指针反转后，此时`cur`指针就恰好指在结点`n + 1`上。此时将结点`m`的`next`指针指向`cur`、将结点`m - 1`的`next`指针指向`pre`即可。
+
+#### 问题实现
+```
+/**
+  * Definition for singly-linked list.
+  * function ListNode(val) {
+  *   this.val = val;
+  *   this.next = null;
+  * }
+  */
+/**
+  * @param {ListNode} head
+  * @param {number} m
+  * @param {number} n
+  * @return {ListNode}
+*/
+// 入参是头结点、m、n
+const reverseBetween = function (head, m, n) {
+  // 定义 pre、cur，用 leftHead 来承接整个区间的前驱结点
+  let pre, cur, leftHead;
+  // 别忘了用 dummy
+  const dummy = new ListNode();
+  // dummy 后继结点是头结点
+  dummy.next = head;
+  // p 是一个游标，用于遍历，最初指向 dummy
+  let p = dummy;
+  // p 往前走 m-1 步，走到整个区间的前驱结点处
+  for (let i = 0; i < m - 1; i++) {
+    p = p.next;
+  }
+  // 缓存这个前驱结点到 leftHead 里
+  leftHead = p;
+  // start 是反转区间的第一个结点
+  let start = leftHead.next;
+  // pre 指向 start
+  pre = start;
+  // cur 指向 start 的下一个结点
+  cur = pre.next;
+  // 开始重复反转动作
+  for (let i = m; i < n; i++) {
+    let next = cur.next;
+    cur.next = pre;
+    pre = cur;
+    cur = next;
+  }
+  // leftHead 的后继结点此时为反转后的区间的第一个结点
+  leftHead.next = pre;
+  // 将区间内反转后的最后一个结点 next 指向 cur
+  start.next=cur;
+  // dummy.next 永远指向链表头结点
+  return dummy.next;
+};
+```
+
+### 如何判断链表是否成环
+LeetCode：[141. 环形链表](https://leetcode-cn.com/problems/linked-list-cycle/)（难度：简单）
+
+#### 问题描述
+给定一个链表，判断链表中是否有环。
+
+如果链表中有某个节点，可以通过连续跟踪`next`指针再次到达，则链表中存在环。 为了表示给定链表中的环，使用整数`pos`来表示链表尾连接到链表中的位置（索引从`0`开始）。 如果`pos`是`-1`，则在该链表中没有环。注意：`pos`不作为参数进行传递，仅仅是为了标识链表的实际情况。
+
+如果链表中存在环，则返回`true`。 否则，返回`false`。
+
+```
+示例 1：
+  输入: head = [3, 2, 0, -4]
+  输出: TRUE
+  解释: 链表中有一个环，其尾部链接到第二个节点
+示例 2：
+  输入: head = [1, 2]
+  输出: TRUE
+  解释: 聊表中有一个环，其尾部链接到第二个节点
+示例 3：
+  输入: head = [1]
+  输出: FALSE
+  解释: 链表中没有环
+```
+
+#### 问题分析
+一个环形链表的基本修养，是能够让遍历它的游标回到原点，从`flag`出发，只要能够再回到`flag`处，那么就意味着，正在遍历一个环形链表。
+
+#### 问题实现
+```
+/**
+  * Definition for singly-linked list.
+  * function ListNode(val) {
+  *   this.val = val;
+  *   this.next = null;
+  * }
+  */
+/**
+  * @param {ListNode} head
+  * @return {boolean}
+*/
+// 入参是头结点
+const hasCycle = function(head) {
+  // 只要结点存在，那么就继续遍历
+  while (head) {
+    // 如果 flag 已经立过了，那么说明环存在
+    if (head.flag) {
+      return true;
+    } else {
+      // 如果 flag 没立过，就立一个 flag 再往下走
+      head.flag = true;
+      head = head.next;
+    }
+  }
+  return false;
+}; 
+```
