@@ -237,3 +237,121 @@ const deleteDuplicates = function(head) {
   return dummy.next;
 };
 ```
+
+### 删除链表的倒数第 N 个结点（快慢指针）
+LeetCode：[19. 删除链表的倒数第N个节点](https://leetcode-cn.com/problems/remove-nth-node-from-end-of-list/)（难度：中等）
+
+#### 问题描述
+给定一个链表，删除链表的倒数第`n`个结点，并且返回链表的头结点。
+
+```
+示例 1：
+  输入: 1 -> 2 -> 3 -> 4 -> 5, n = 2
+  输出: 1 -> 2 -> 3 -> 5
+```
+
+#### 问题分析
+可以利用`dummy`结点来处理掉头结点为空的边界问题。在涉及到链表操作（尤其是结点删除）的问题时尽量都使用`dummy`结点。
+```
+const dummy = new ListNode();
+// 这里的 head 是链表原有的第一个结点
+dummy.next = head;
+```
+
+这个问题考虑到遍历不可能从后往前走，因此这个“倒数第 N 个” 可以转换为“正数第`len - n + 1`”个。那么其实可以遍历两次，第一次设置一个变量`count = 0`，每遍历到一个不为空的结点，`count`就加`1`，一直遍历到链表结束为止，得出链表的总长度`len`；根据这个总长度，就可以算出倒数第`n`个到底是正数第几个了（`M = len - n + 1`），当遍历到第`M - 1`（即`len - n`） 个结点的时候就可以停下来，执行删除操作。
+
+但是，超过一次的遍历性能会有所损耗，这时就需要双指针来帮助处理了。
+
+首先两个指针`slow`和`fast`，全部指向链表的起始位，即`dummy`结点。快指针先出发走上`n`步，在第`n`个结点处停止。然后，快慢指针一起前进，当快指针前进到最后一个结点处时，两个指针再一起停下来。此时，慢指针所指的位置，就是倒数第`n`个结点的前一个结点。基于这个结点来做删除，会非常方便。
+
+链表删除问题中，若走两次遍历，会先求长度，再做减法、找定位。若用快慢指针，其实是把做减法和找定位这个过程给融合了。通过快指针先行一步、接着快慢指针一起前进这个操作，巧妙地把两个指针之间的差值保持在了`n`上，这样当快指针走到链表末尾（第`len`个）时，慢指针刚好就在`len - n`这个地方稳稳落地。
+
+#### 问题实现
+```
+/**
+  * Definition for singly-linked list.
+  * function ListNode(val) {
+  *   this.val = val;
+  *   this.next = null;
+  * }
+  */
+/**
+  * @param {ListNode} head
+  * @param {number} n
+  * @return {ListNode}
+  */
+const removeNthFromEnd = function(head, n) {
+  // 初始化 dummy 结点
+  const dummy = new ListNode();
+  // dummy 指向头结点
+  dummy.next = head;
+  // 初始化快慢指针，均指向 dummy
+  let fast = dummy;
+  let slow = dummy;
+  // 快指针闷头走 n 步
+  while (n !== 0) {
+    fast = fast.next;
+    n--;
+  }
+  // 快慢指针一起走
+  while (fast.next) {
+    fast = fast.next;
+    slow = slow.next;
+  }
+  // 慢指针删除自己的后继结点
+  slow.next = slow.next.next;
+  // 返回头结点
+  return dummy.next;
+};
+```
+
+### 链表的完全反转（多指针法）
+LeetCode：[206. 反转链表](https://leetcode-cn.com/problems/reverse-linked-list/)（难度：简单）
+
+#### 问题描述
+反转一个单链表。
+```
+示例 1：
+  输入: 1 -> 2 -> 3 -> 4 -> 5 -> NULL
+  输出: 5 -> 4 -> 3 -> 2 -> 1 -> NULL
+```
+
+#### 问题分析
+处理链表的本质，是处理链表结点之间的指针关系。而链表的反转，本质上就是将结点的`next`指针反转。
+
+这个问题需要用到三个指针，分别指向目标结点（`cur`）、目标结点的前驱结点（`pre`）、目标结点的后继结点（`next`）。只需要一个简单的`cur.next = pre`，就做到了`next`指针的反转，再用`next`指着`cur`原本的后继结点，从第一个结点开始，每个结点都给它进行一次`next`指针的反转。到最后一个结点时，整个链表就已经被彻底反转掉了。
+
+#### 问题实现
+```
+/**
+  * Definition for singly-linked list.
+  * function ListNode(val) {
+  *   this.val = val;
+  *   this.next = null;
+  * }
+  */
+/**
+  * @param {ListNode} head
+  * @return {ListNode}
+  */
+const reverseList = function(head) {
+  // 初始化前驱结点为 null
+  let pre = null;
+  // 初始化目标结点为头结点
+  let cur = head;
+  // 只要目标结点不为 null，遍历就得继续
+  while (cur !== null) {
+    // 记录一下 next 结点
+    let next = cur.next;
+    // 反转指针
+    cur.next = pre;
+    // pre 往前走一步
+    pre = cur;
+    // cur 往前走一步
+    cur = next;
+  }
+  // 反转结束后，pre 就会变成新链表的头结点
+  return pre;
+};
+```
+
