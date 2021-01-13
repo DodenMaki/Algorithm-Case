@@ -5,6 +5,6 @@ describe('剑指 Offer 13. 机器人的运动范围', () => {
     expect(movingCount(2, 3, 1)).toBe(3);
   });
   test('示例 2', function() {
-    expect(movingCount(3, 1, 0)).toBeFalsey(3);
+    expect(movingCount(3, 1, 0)).toBe(3);
   });
 });

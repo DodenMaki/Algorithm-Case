@@ -1,6 +1,6 @@
 /**
  * 剑指 Offer 13. 机器人的运动范围
- * https://leetcode-cn.com/problems/ji-qi-ren-de-yun-dong-fan-wei-lcof/
+ * LeetCode：https://leetcode-cn.com/problems/ji-qi-ren-de-yun-dong-fan-wei-lcof/
  */
 
 /**
@@ -13,6 +13,7 @@
  * 输入：m = 3, n = 1, k = 0
  * 输出：1
  */
+
 /**
  * @param {number} m
  * @param {number} n
@@ -50,7 +51,7 @@ var movingCount = function(m, n, k) {
       if (offsetX < 0 || offsetX >= m || offsetY < 0 || offsetY >= n || getSum(offsetX) + getSum(offsetY) > k || set.has(`${offsetX}.${offsetY}`)) {
         continue;
       }
-
+ 
       set.add(`${offsetX}.${offsetY}`);
       queue.push([offsetX, offsetY]);
     }
