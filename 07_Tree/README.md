@@ -172,3 +172,141 @@ const preorderTraversal = function(root) {
   return res;
 };
 ```
+
+#### 二叉树的后序遍历
+LeetCode：[145. 二叉树的后序遍历](https://leetcode-cn.com/problems/binary-tree-postorder-traversal/)（难度：中等）
+
+##### 问题描述
+给定一个二叉树，返回它的后序遍历。
+```
+示例：
+  输入: root = [1, null, 2, 3]
+  输出: [3, 2, 1]
+```
+
+##### 问题分析
+后序遍历的出栈序列，按照规则应该是“左、右、根” 。这个顺序相对于先序遍历，最明显的变化就是根结点的位置从第一个变成了倒数第一个。在这里，可以直接把先序遍历中`pop`出来的当前结点`unshift`进`res`的头部。
+
+由于填充`res`结果数组的顺序是从后往前填充（每次增加一个头部元素），因此先出栈的结点反而会位于`res`数组相对靠后的位置。出栈的顺序是“当前结点、当前结点的左孩子、当前结点的右孩子”，其对应的`res`序列顺序就是“右、左、根”。这样一来， 根结点就成功地被转移到了遍历序列的最末尾。
+
+现在唯一的问题就是右孩子和左孩子的顺序了，这两个孩子结点进入结果数组的顺序与其被`pop`出栈的顺序是一致的，而出栈顺序又完全由入栈顺序决定，因此只需要相应地调整两个结点的入栈顺序就好了。如此一来，右孩子就会相对于左孩子优先出栈，进而被放在`res`结果数组相对靠后的位置，“左、右、根”的排序规则就稳稳地实现出来了。
+   
+##### 问题实现
+```
+/**
+  * Definition for a binary tree node.
+  * function TreeNode(val, left, right) {
+  *   this.val = (val===undefined ? 0 : val)
+  *   this.left = (left===undefined ? null : left)
+  *   this.right = (right===undefined ? null : right)
+  * }
+  */
+/**
+  * @param {TreeNode} root
+  * @return {number[]}
+  */
+const postorderTraversal = function(root) {
+  // 定义结果数组
+  const res = [];
+  // 处理边界条件
+  if (!root) {
+    return res;
+  }
+
+  // 初始化栈结构
+  const stack = [];
+  // 首先将根结点入栈
+  stack.push(root);
+
+  // 若栈不为空，则重复出栈、入栈操作
+  while(stack.length) {
+    // 将栈顶结点记为当前结点
+    const cur = stack.pop();
+    // 当前结点就是当前子树的根结点，把这个结点放在结果数组的头部
+    res.unshift(cur.val);
+    // 若当前子树根结点有左孩子，则将左孩子入栈
+    if (cur.left) {
+      stack.push(cur.left);
+    }
+    // 若当前子树根结点有右孩子，则将右孩子入栈
+    if (cur.right) {
+      stack.push(cur.right);
+    }
+  }
+  // 返回结果数组
+  return res;
+};
+```
+
+#### 二叉树的中序遍历
+LeetCode：[94. 二叉树的中序遍历](https://leetcode-cn.com/problems/binary-tree-inorder-traversal/)（难度：中等）
+
+##### 问题描述
+给定一个二叉树的根节点`root`，返回它的中序遍历。
+```
+示例 1：
+  输入: root = [1, null, 2, 3]
+  输出: [1, 3, 2]
+示例 2：
+  输入: root = []
+  输出: []
+示例 3：
+  输入: root = [1]
+  输出: [1]
+示例 4：
+  输入: root = [1, 2]
+  输出: [2, 1]
+示例 5：
+  输入: root = [1, null, 2]
+  输出: [1, 2]
+```
+
+##### 问题分析
+先序遍历和后序遍历实现的方式基本一致，它们遵循的都是同一套框架。但是中序遍历则不能用同一套框架来实现，本质上是因为先序、后序的出栈与入栈逻辑基本相差不大（都是先处理根结点，然后处理孩子结点）。
+
+但是在中序遍历中，根结点不再出现在遍历序列的边界，而是在遍历序列的中间。这就意味着不能将根结点作为第一个被`pop`出来的元素处理了，也就是随着出栈时机的改变，入栈的逻辑也需要调整。
+
+中序遍历的序列规则是“左、中、右”，因此必须首先定位到最左的叶子结点。在这个定位的过程中，必然会途径目标结点的父结点、爷爷结点和各种辈分的祖宗结点。途径过的每一个结点，都要及时地把它入栈。这样当最左的叶子结点出栈时，第一个回溯到的就是它的父结点。有了父结点，就能够找到兄弟结点，遍历结果就出来了。
+
+##### 问题实现
+```
+/**
+  * Definition for a binary tree node.
+  * function TreeNode(val, left, right) {
+  *   this.val = (val===undefined ? 0 : val)
+  *   this.left = (left===undefined ? null : left)
+  *   this.right = (right===undefined ? null : right)
+  * }
+  */
+/**
+  * @param {TreeNode} root
+  * @return {number[]}
+  */
+const inorderTraversal = function(root) {
+  // 定义结果数组
+  const res = [];
+  // 初始化栈结构
+  const stack = [];
+
+  // 用一个 cur 结点充当游标
+  let cur = root;
+  // 当 cur 不为空、或者 stack 不为空时，重复以下逻辑
+  while (cur || stack.length) {
+    // 这个 while 的作用是把寻找最左叶子结点的过程中，途径的所有结点都记录下来
+    while(cur) {
+      // 将途径的结点入栈
+      stack.push(cur);
+      // 继续搜索当前结点的左孩子
+      cur = cur.left;
+    }
+    // 取出栈顶元素
+    cur = stack.pop();
+    // 将栈顶元素入栈
+    res.push(cur.val);
+    // 尝试读取 cur 结点的右孩子
+    cur = cur.right;
+  }
+  // 返回结果数组
+  return res;
+};
+```
