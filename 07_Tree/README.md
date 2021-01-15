@@ -310,3 +310,128 @@ const inorderTraversal = function(root) {
   return res;
 };
 ```
+
+#### 二叉树的层序遍历衍生问题
+LeetCode：[102. 二叉树的层序遍历](https://leetcode-cn.com/problems/binary-tree-level-order-traversal/)（难度：中等）
+
+##### 问题描述
+给你一个二叉树，请你返回其按 层序遍历 得到的节点值。 （即逐层地，从左到右访问所有节点）。
+
+```
+示例 1：
+  输入: root = [3, 9, 20, null, null, 15, 7]
+  输出: [
+        [3],
+        [9, 20],
+        [25, 7],
+       ]
+```
+
+##### 问题分析
+
+看到层序遍历，第一时间想到采用 BFS 和队列，只是它需要在 BFS 的过程中围绕结果数组的内容进行部分修改。这个问题要求在对层序遍历结果进行分层，也就是说只要能在 BFS 的过程中感知到当前层级，同时用不同的数组把不同的层级区分开，这个问题就解决了。
+
+在对二叉树进行层序遍历时，每一次`while`循环其实都对应着二叉树的某一层。只要在进入`while`循环之初，记录下这一层结点个数，然后将这个数量范围内的元素 push 进同一个数组，就能够实现二叉树的分层。
+
+3#### 问题实现
+```
+/**
+  * Definition for a binary tree node.
+  * function TreeNode(val) {
+  *   this.val = val;
+  *   this.left = this.right = null;
+  * }
+  */
+/**
+  * @param {TreeNode} root
+  * @return {number[][]}
+  */
+const levelOrder = function(root) {
+  // 初始化结果数组
+  const res = [];
+  // 处理边界条件
+  if(!root) {
+    return res;
+  }
+
+  // 初始化队列
+  const queue = [];
+  // 队列第一个元素是根结点
+  queue.push(root);
+
+  // 当队列不为空时，反复执行以下逻辑
+  while (queue.length) {
+    // level 用来存储当前层的结点
+    const level = [];
+    // 缓存刚进入循环时的队列长度，这一步很关键，因为队列长度后面会发生改变
+    const len = queue.length;
+
+    // 循环遍历当前层级的结点
+    for(let i = 0; i < len; i++) {
+      // 取出队列的头部元素
+      const top = queue.shift();  
+      // 将头部元素的值推入 level 数组
+      level.push(top.val);
+      // 如果当前结点有左孩子，则推入下一层级
+      if (top.left) {
+        queue.push(top.left);
+      }
+      // 如果当前结点有右孩子，则推入下一层级
+      if (top.right) {
+        queue.push(top.right);
+      }
+    }
+    // 将 level 推入结果数组
+    res.push(level);
+  }
+  // 返回结果数组
+  return res;
+};
+```
+
+#### 二叉树的翻转
+LeetCode：[226. 翻转二叉树](https://leetcode-cn.com/problems/invert-binary-tree/)（难度：简单）
+
+##### 问题描述
+翻转一棵二叉树。
+
+```
+示例 1：
+  输入: root = [4, 2, 7, 1, 3, 6, 9]
+  输出: [4, 7, 2, 9, 6, 3, 1]
+```
+
+##### 问题分析
+这个问题是一个非常经典的递归应用类问题。一棵二叉树，经过翻转后，每一棵子树的左孩子和右孩子都发生了交换。既然是“每一棵子树”，那么就意味着重复，既然涉及了重复，就没有理由不用递归。
+
+于是这个问题的解决思路就是以递归的方式，遍历树中的每一个结点，并将每一个结点的左右孩子进行交换。
+
+##### 问题实现
+```
+/**
+  * Definition for a binary tree node.
+  * function TreeNode(val) {
+  *   this.val = val;
+  *   this.left = this.right = null;
+  * }
+  */
+/**
+  * @param {TreeNode} root
+  * @return {TreeNode}
+  */
+const invertTree = function(root) {
+  // 定义递归边界
+  if(!root) {
+    return root;
+  }
+
+  // 递归交换右孩子的子结点
+  let right = invertTree(root.right);
+  // 递归交换左孩子的子结点
+  let left = invertTree(root.left);
+  // 交换当前遍历到的两个左右孩子结点
+  root.left = right;
+  root.right = left;
+  return root;
+};
+```
